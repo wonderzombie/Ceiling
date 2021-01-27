@@ -1,6 +1,6 @@
-import irc.PlainTextConn
 import irc.IrcClient
 import irc.IrcCommand
+import irc.PlainTextConn
 
 val replies = listOf(
     "i like fire swords",
@@ -11,13 +11,9 @@ val replies = listOf(
 )
 
 fun main() {
-    val conn = PlainTextConn()
-    val irc = IrcClient(conn)
+    val irc = IrcClient(PlainTextConn())
 
     println("begin ceiling")
-    while (!conn.socket.isConnected) {
-        println("not connected yet")
-    }
 
     with(irc) {
         handShake()
