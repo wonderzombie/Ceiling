@@ -4,7 +4,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlin.random.Random
 
-class IrcClient(private val conn: PlainTextConn, private val nick: String = "thumbkin") {
+interface Connection {
+    val isConnected: Boolean
+
+    fun sendMsg(message: String)
+    fun readLine(): String
+}
+
+class IrcClient(private val conn: Connection, private val nick: String = "thumbkin") {
     private fun s(msg: String) =
         conn.sendMsg(msg)
 
@@ -14,10 +21,6 @@ class IrcClient(private val conn: PlainTextConn, private val nick: String = "thu
         set(value) {
             field = channelList.plus(value)
         }
-
-//    fun next(): <IrcMessage> = produce<IrcMessage> {
-//        nextMessage()
-//    }
 
     fun nextMessage(): IrcMessage {
         var rawMessage = ""
@@ -52,12 +55,12 @@ class IrcClient(private val conn: PlainTextConn, private val nick: String = "thu
     }
 
     val isConnected: Boolean
-        get() = this.conn.socket.isConnected
+        get() = this.conn.isConnected
 
     fun action(emote: String) = s("PRIVMSG $activeChannel : ACTION $emote")
 
     fun handShake() {
         this send "NICK $nick"
-        this send "USER $nick bot localhost :thumbkin"
+        this send "USER $nick bot localhost :$nick"
     }
 }

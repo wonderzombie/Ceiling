@@ -10,6 +10,8 @@ class PlainTextConn(addr: InetAddress = InetAddress.getLocalHost(), port: Int = 
     val writer = PrintWriter(socket.getOutputStream())
 
     private val reader = InputStreamReader(socket.getInputStream())
+    override val isConnected: Boolean
+        get() = socket.isConnected
 
     override fun sendMsg(message: String) {
         writer.write(message + "\r\n")
@@ -25,20 +27,3 @@ class PlainTextConn(addr: InetAddress = InetAddress.getLocalHost(), port: Int = 
     }
 }
 
-class FakeConn(public var received: List<String>, public var toSend: List<String>) : Connection {
-    override fun sendMsg(message: String) {
-        received += received
-    }
-
-    override fun readLine(): String {
-        val ln = toSend.first()
-        toSend = toSend.minus(ln)
-        return ln
-    }
-
-}
-
-interface Connection {
-    fun sendMsg(message: String)
-    fun readLine(): String
-}
