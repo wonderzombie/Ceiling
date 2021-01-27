@@ -1,15 +1,19 @@
 package irc
 
-import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlin.random.Random
 
-class IrcClient(private val conn: Connection, private val nick: String = "thumbkin") {
+class IrcClient(private val conn: PlainTextConn, private val nick: String = "thumbkin") {
     private fun s(msg: String) =
         conn.sendMsg(msg)
 
     private var activeChannel = ""
+
+    private var channelList: List<String> = listOf()
+        set(value) {
+            field = channelList.plus(value)
+        }
 
 //    fun next(): <IrcMessage> = produce<IrcMessage> {
 //        nextMessage()
@@ -46,6 +50,9 @@ class IrcClient(private val conn: Connection, private val nick: String = "thumbk
         delay(message.length * (10L * Random.nextInt() % 3))
         s("PRIVMSG $activeChannel :$message")
     }
+
+    val isConnected: Boolean
+        get() = this.conn.socket.isConnected
 
     fun action(emote: String) = s("PRIVMSG $activeChannel : ACTION $emote")
 

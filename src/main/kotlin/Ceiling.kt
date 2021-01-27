@@ -1,8 +1,6 @@
-import irc.Connection
+import irc.PlainTextConn
 import irc.IrcClient
 import irc.IrcCommand
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.runBlocking
 
 val replies = listOf(
     "i like fire swords",
@@ -13,7 +11,7 @@ val replies = listOf(
 )
 
 fun main() {
-    val conn = Connection()
+    val conn = PlainTextConn()
     val irc = IrcClient(conn)
 
     println("begin ceiling")
