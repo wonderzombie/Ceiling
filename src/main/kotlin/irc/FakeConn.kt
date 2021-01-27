@@ -1,6 +1,6 @@
 package irc
 
-class FakeConn() : Connection {
+class FakeConn : Connection {
     override val isConnected: Boolean
         get() = true
 

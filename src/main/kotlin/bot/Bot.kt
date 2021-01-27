@@ -1,0 +1,4 @@
+package bot
+
+class Bot {
+}
