@@ -1,0 +1,5 @@
+package irc
+
+class IrcClientTest {
+
+}
