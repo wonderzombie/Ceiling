@@ -4,13 +4,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlin.random.Random
 
-interface Connection {
-    val isConnected: Boolean
-
-    fun sendMsg(message: String)
-    fun readLine(): String
-}
-
 class IrcClient(private val conn: Connection, private val nick: String = "thumbkin") {
     private fun s(msg: String) =
         conn.sendMsg(msg)
