@@ -14,16 +14,6 @@ class BotTest {
     private val bot = Bot.connect(IrcClient(fakeConn))
 
     @Test
-    fun bot_addListener_addedOk() {
-        val fn: ListenerFn = { c: IrcClient, m: IrcMessage ->
-            c.privmsg("hello got message type: " + m.type)
-        }
-
-        bot.addListeners(fn)
-        assertThat(bot.listeners).containsExactly(fn)
-    }
-
-    @Test
     fun bot_listenerSendsChat_ok() {
         val chatFn: ListenerFn = { c: IrcClient, m: IrcMessage ->
             if (m.type == IrcCommand.PRIVMSG) {

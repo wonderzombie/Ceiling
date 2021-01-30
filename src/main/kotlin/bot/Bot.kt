@@ -4,7 +4,7 @@ import irc.IrcClient
 import irc.IrcMessage
 
 typealias ListenerFn = (c: IrcClient, m: IrcMessage) -> Unit
-typealias ReplyFn = (s: String) -> Unit
+typealias ConsumerFn = (c: IrcClient, m: IrcMessage) -> Boolean
 
 class Bot private constructor(private val client: IrcClient) {
     companion object {
@@ -14,14 +14,32 @@ class Bot private constructor(private val client: IrcClient) {
     }
 
     var listeners: List<ListenerFn> = listOf()
+    var consumers: List<ConsumerFn> = listOf()
+
+    fun addConsumers(vararg newConsumers: ConsumerFn) {
+        consumers = consumers.plus(newConsumers)
+    }
 
     fun addListeners(vararg newListeners: ListenerFn) {
         listeners = listeners.plus(newListeners)
     }
 
+    private fun checkConsumers(msg: IrcMessage): Boolean =
+        consumers.map { c -> checkConsume(msg, c).also { r -> println(r) } }.any { it }
+
+    private fun checkConsume(
+        msg: IrcMessage,
+        fn: ConsumerFn
+    ): Boolean = fn.invoke(client, msg).also { println("consuming: $msg ? $it") }
+
     fun loopOnce() {
         val msg = client.nextMessage()
-        listeners.forEach { it.invoke(client, msg) }
+
+        val consumed = checkConsumers(msg)
+
+        if (!consumed) {
+            listeners.forEach { it.invoke(client, msg) }
+        }
     }
 
     fun loopForever() {
