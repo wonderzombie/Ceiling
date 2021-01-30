@@ -13,7 +13,7 @@ class IrcClientTest {
         val cli = IrcClient(fakeConn, nick = "grumkin")
 
         cli.join("#bucket")
-        cli.chat("what is up my bucket")
+        cli.privmsg("what is up my bucket")
 
         assertThat(fakeConn.received).hasSize(2)
         assertThat(fakeConn.received).containsExactly(

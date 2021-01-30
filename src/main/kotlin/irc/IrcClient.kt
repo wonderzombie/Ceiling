@@ -42,7 +42,7 @@ class IrcClient(private val conn: Connection, private val nick: String = "thumbk
     fun join(channel: String) =
         s("JOIN $channel $nick").also { this.activeChannel = channel }
 
-    fun chat(message: String) = runBlocking {
+    fun privmsg(message: String) = runBlocking {
         delay(message.length * (10L * Random.nextInt() % 3))
         s("PRIVMSG $activeChannel :$message")
     }

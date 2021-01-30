@@ -19,12 +19,12 @@ fun main() {
         handShake()
 
         join("#blobby")
-        chat("hi")
+        privmsg("hi")
 
         while (true) {
             val message = nextMessage()
             if (message.type == IrcCommand.PRIVMSG && message.rawMessage.contains("thumbkin")) {
-                irc.chat(replies.random())
+                irc.privmsg(replies.random())
             }
         }
     }
