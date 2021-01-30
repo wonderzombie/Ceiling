@@ -1,6 +1,9 @@
+import bot.Bot
 import irc.IrcClient
 import irc.IrcCommand
+import irc.IrcMessage
 import irc.PlainTextConn
+import kotlinx.coroutines.runBlocking
 
 val replies = listOf(
     "i like fire swords",
@@ -10,22 +13,14 @@ val replies = listOf(
     "where is thumbkin, where is thumbkin"
 )
 
-fun main() {
-    val irc = IrcClient(PlainTextConn())
+fun main() = runBlocking {
+    val bot = Bot.connect(IrcClient(PlainTextConn()))
 
-    println("begin ceiling")
+    bot.addListeners(::nameListener)
+}
 
-    with(irc) {
-        handShake()
-
-        join("#blobby")
-        privmsg("hi")
-
-        while (true) {
-            val message = nextMessage()
-            if (message.type == IrcCommand.PRIVMSG && message.rawMessage.contains("thumbkin")) {
-                irc.privmsg(replies.random())
-            }
-        }
+fun nameListener(cli: IrcClient, msg: IrcMessage) {
+    if (msg.type == IrcCommand.PRIVMSG) {
+        if (msg.body.contains("thumbkin")) cli.privmsg(replies.random())
     }
 }

@@ -29,6 +29,8 @@ class IrcMessageTest {
         val ircMessage = IrcMessage.from(rawMessage)
         assertThat(ircMessage.type).isEquivalentAccordingToCompareTo(IrcCommand.PRIVMSG)
         assertThat(ircMessage.header).startsWith("foo!~bar@localhost")
+        assertThat(ircMessage.header).contains("#blobby")
+        assertThat(ircMessage.body).contains("hello there my friend: you're the best")
     }
 
     @Test

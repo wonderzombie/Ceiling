@@ -10,22 +10,22 @@ import org.junit.Test
 
 class BotTest {
 
-    val fakeConn = FakeConn()
-    val bot = Bot.connect(IrcClient(fakeConn))
+    private val fakeConn = FakeConn()
+    private val bot = Bot.connect(IrcClient(fakeConn))
 
     @Test
     fun bot_addListener_addedOk() {
-        val fn: Listener = { c: IrcClient, m: IrcMessage ->
+        val fn: ListenerFn = { c: IrcClient, m: IrcMessage ->
             c.privmsg("hello got message type: " + m.type)
         }
 
-        bot.addListener(fn)
+        bot.addListeners(fn)
         assertThat(bot.listeners).containsExactly(fn)
     }
 
     @Test
     fun bot_listenerSendsChat_ok() {
-        val chatFn: Listener = { c: IrcClient, m: IrcMessage ->
+        val chatFn: ListenerFn = { c: IrcClient, m: IrcMessage ->
             if (m.type == IrcCommand.PRIVMSG) {
                 c.privmsg("hello world")
             }
@@ -35,7 +35,7 @@ class BotTest {
             }
         }
 
-        bot.addListener(chatFn)
+        bot.addListeners(chatFn)
         fakeConn.addToSendList(":foo.bar.baz 001 foo :welcome to the server")
         fakeConn.addToSendList(":foo!~foo@localhost PRIVMSG #bucket :hello bucket")
 
