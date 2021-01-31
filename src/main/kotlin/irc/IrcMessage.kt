@@ -7,7 +7,6 @@ data class IrcMessage(val rawMessage: String) {
 
     var header: String = ""
     var body: String = ""
-    var footer: String = ""
 
     private fun parse(): IrcMessage {
         val trimmedMessage = if (rawMessage.startsWith(":")) rawMessage.drop(1) else rawMessage
@@ -24,11 +23,11 @@ data class IrcMessage(val rawMessage: String) {
     private fun parseUserMessage(rawMessage: String): IrcMessage {
         when (type) {
             IrcCommand.PRIVMSG -> {
-                val privMsgParts = rawMessage.split(":", limit = 2)
-                header = privMsgParts[0]
-                body = privMsgParts[1]
-                println("| user header < $header >")
-                println("| user body < $body >")
+                rawMessage.split(":", limit = 2).let {
+                    if (it.isEmpty()) return@let
+                    header = it[0]
+                    body = if (it.size == 1) "" else it[1]
+                }
             }
             else -> listOf(rawMessage).also { println("WHAT IS THIS: $it") }
         }
@@ -36,17 +35,10 @@ data class IrcMessage(val rawMessage: String) {
     }
 
     private fun parseServerMessage(rawMessage: String): IrcMessage {
-        rawMessage.split(Regex(":"), 2).let {
-            println("| server message parts < $it >")
-
-            header = it.first().trim()
-            if (it.size > 2) {
-                body = it.drop(1).joinToString(separator = "\n").trim()
-                footer = it.drop(2).joinToString(separator = "\n").trim()
-            } else {
-                body = it.drop(1).joinToString(separator = "\n").trim()
-                footer = ""
-            }
+        rawMessage.split(Regex(":"), 2).let { tokens ->
+            println("| server message tokens < $tokens >")
+            header = tokens[0].trim()
+            body = if (tokens.size == 1) "" else tokens[1]
         }
         return this
     }

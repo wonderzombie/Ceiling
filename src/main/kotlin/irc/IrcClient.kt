@@ -12,11 +12,11 @@ class IrcClient(private val conn: Connection, val nick: String = "thumbkin") {
 
     // type
     private fun t(msg: String) = runBlocking {
-        val delayMillis = typeSpeed * msg.split(":")[1].length
+        val delayMillis = randomInterval * msg.split(":", limit = 2)[1].length
         delay(delayMillis).also { s(msg) }
     }
 
-    private val typeSpeed: Long
+    private val randomInterval: Long
         get() = 10L * Random.nextInt() % 3
 
     private var activeChannel = ""
@@ -32,21 +32,17 @@ class IrcClient(private val conn: Connection, val nick: String = "thumbkin") {
             rawMessage = conn.readLine()
         }
 
-        val ircMessage = IrcMessage.from(rawMessage)
-
-        if (ircMessage.type == IrcCommand.PING) {
-            pong(ircMessage)
-        }
-
-        return ircMessage
+        return IrcMessage.from(rawMessage).also { if (it.type == IrcCommand.PING) pong(it) }
     }
 
     private infix fun send(msg: String) =
         conn.sendMsg(msg)
 
+    // the client handles pong without user intervention
     private fun pong(ircMessage: IrcMessage) {
-        val pingParts = ircMessage.rawMessage.split(":", limit = 2).drop(1)
-        return s("PONG :${pingParts[0]}")
+        ircMessage.rawMessage.split(":", limit = 2).drop(1).let {
+            return@pong s("PONG :${it[0]}")
+        }
     }
 
     fun join(channel: String) =

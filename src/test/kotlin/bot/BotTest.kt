@@ -14,14 +14,14 @@ class BotTest {
     private val bot = Bot.connect(IrcClient(fakeConn))
 
     @Test
-    fun bot_listenerSendsChat_ok() {
+    fun bot_connectsAndSends_ok() {
         val chatFn: ListenerFn = { c: IrcClient, m: IrcMessage ->
             if (m.type == IrcCommand.PRIVMSG) {
-                c.privmsg("hello world")
+                c.privmsg("#bouquet", "hello world")
             }
 
             if (m.type == IrcCommand.JOIN) {
-                c.privmsg("this shouldn't happen")
+                c.privmsg("#uhoh", "this shouldn't happen")
             }
         }
 
@@ -33,10 +33,10 @@ class BotTest {
         bot.loopOnce()
 
         assertThat(fakeConn.received).isNotEmpty()
-        assertThat(fakeConn.received).hasSize(1)
+        assertThat(fakeConn.received).hasSize(3)
 
-        val sentByBot = fakeConn.received[0]
-        assertThat(sentByBot).contains("hello world")
+        val sentByBot = fakeConn.received
+        assertThat(sentByBot).contains("PRIVMSG #bouquet :hello world")
         assertThat(sentByBot).doesNotContain("this shouldn't happen")
     }
 }

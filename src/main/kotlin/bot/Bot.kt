@@ -42,12 +42,11 @@ class Bot private constructor(private val client: IrcClient) {
     ): Boolean = fn.invoke(client, msg).also { println("consuming: $msg ? $it") }
 
     fun loopOnce() {
-        val msg = client.nextMessage()
-
-        val consumed = checkConsumers(msg)
-        if (!consumed) {
-            val listenersForType = listeners[msg.type] ?: listOf()
-            listenersForType.forEach { it.invoke(client, msg) }
+        client.nextMessage().let { msg ->
+            if (checkConsumers(msg)) {
+                return
+            }
+            listeners[msg.type]?.forEach { l -> l.invoke(client, msg) }
         }
     }
 
