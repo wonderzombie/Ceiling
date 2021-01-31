@@ -23,7 +23,7 @@ class IrcMessageTest {
     }
 
     @Test
-    fun ircMessage_privmsg_capturedCorrectly() {
+    fun ircMessage_PRIVMSG_capturedCorrectly() {
         val rawMessage =
             ":foo!~bar@localhost PRIVMSG #blobby :hello there my friend: you're the best"
         val ircMessage = IrcMessage.from(rawMessage)
@@ -34,7 +34,7 @@ class IrcMessageTest {
     }
 
     @Test
-    fun ircMessage_join_capturedCorrectly() {
+    fun ircMessage_JOIN_capturedCorrectly() {
         val rawMessage = "JOIN #blobby botname"
         val ircMessage = IrcMessage.from(rawMessage)
         assertThat(ircMessage.type).isEquivalentAccordingToCompareTo(IrcCommand.JOIN)
@@ -42,7 +42,7 @@ class IrcMessageTest {
     }
 
     @Test
-    fun ircMessage_ping_capturedCorrectly() {
+    fun ircMessage_PING_capturedCorrectly() {
         val rawMessage = "PING :irc.example.net"
         val ircMessage = IrcMessage.from(rawMessage)
         assertThat(ircMessage.type).isEquivalentAccordingToCompareTo(IrcCommand.PING)

@@ -24,3 +24,7 @@ fun nameListener(cli: IrcClient, msg: IrcMessage) {
         if (msg.body.contains("thumbkin")) cli.privmsg(replies.random())
     }
 }
+
+fun sleepConsumer(cli: IrcClient, msg: IrcMessage) {
+
+}

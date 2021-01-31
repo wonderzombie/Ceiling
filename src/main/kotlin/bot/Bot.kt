@@ -15,7 +15,14 @@ class Bot private constructor(private val client: IrcClient) {
 
     var listeners: List<ListenerFn> = listOf()
     var consumers: List<ConsumerFn> = listOf()
+    var registeredModules: List<String> = listOf()
 
+    fun register(id: String, fn: (b: Bot) -> Unit) {
+        fn(this);
+        registeredModules = registeredModules.plus(id)
+    }
+
+    // For such as a NAMES command that shouldn't percolate down to "user space."
     fun addConsumers(vararg newConsumers: ConsumerFn) {
         consumers = consumers.plus(newConsumers)
     }
@@ -36,7 +43,6 @@ class Bot private constructor(private val client: IrcClient) {
         val msg = client.nextMessage()
 
         val consumed = checkConsumers(msg)
-
         if (!consumed) {
             listeners.forEach { it.invoke(client, msg) }
         }

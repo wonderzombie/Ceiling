@@ -1,7 +1,7 @@
 package irc
 
 class IrcMessage private constructor(val rawMessage: String) {
-    private val userRegex = Regex("""\w[^!]+!~\w+@\w+""")
+    private val userRegex = Regex("""\w[^!]+!~\w+@[\w\.]+""")
 
     val type = IrcCommand.from(rawMessage)
 
@@ -12,9 +12,8 @@ class IrcMessage private constructor(val rawMessage: String) {
     private fun parse(): IrcMessage {
         val trimmedMessage = if (rawMessage.startsWith(":")) rawMessage.drop(1) else rawMessage
         val splitMessage = trimmedMessage.split(":", limit = 2)
-//        println("| raw msg: $rawMessage")
         println("| trimmed msg: $trimmedMessage")
-        if (splitMessage.first().matches(userRegex)) {
+        if (userRegex.containsMatchIn(splitMessage.first())) {
             println("| user msg")
             return parseUserMessage(trimmedMessage)
         }
@@ -26,13 +25,12 @@ class IrcMessage private constructor(val rawMessage: String) {
         when (type) {
             IrcCommand.PRIVMSG -> {
                 val privMsgParts = rawMessage.split(":", limit = 2)
-                println("| privmsgparts $privMsgParts")
                 header = privMsgParts[0]
                 body = privMsgParts[1]
                 println("| user header < $header >")
                 println("| user body < $body >")
             }
-            else -> listOf(rawMessage).also { println("what is this: $it") }
+            else -> listOf(rawMessage).also { println("WHAT IS THIS: $it") }
         }
         return this
     }
