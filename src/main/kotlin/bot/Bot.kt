@@ -1,6 +1,7 @@
 package bot
 
 import irc.IrcClient
+import irc.IrcCommand
 import irc.IrcMessage
 
 typealias ListenerFn = (c: IrcClient, m: IrcMessage) -> Unit
@@ -13,9 +14,9 @@ class Bot private constructor(private val client: IrcClient) {
         }
     }
 
-    var listeners: List<ListenerFn> = listOf()
-    var consumers: List<ConsumerFn> = listOf()
-    var registeredModules: List<String> = listOf()
+    private var listeners: Map<IrcCommand, List<ListenerFn>> = mapOf()
+    private var consumers: List<ConsumerFn> = listOf()
+    private var registeredModules: List<String> = listOf()
 
     fun register(id: String, fn: (b: Bot) -> Unit) {
         fn(this);
@@ -27,8 +28,10 @@ class Bot private constructor(private val client: IrcClient) {
         consumers = consumers.plus(newConsumers)
     }
 
-    fun addListeners(vararg newListeners: ListenerFn) {
-        listeners = listeners.plus(newListeners)
+    fun addListeners(type: IrcCommand, vararg newListeners: ListenerFn) {
+        val currentListeners = listeners[type] ?: listOf()
+        val allListeners: List<ListenerFn> = currentListeners.plus(newListeners)
+        listeners = listeners.plus(mapOf(type to allListeners))
     }
 
     private fun checkConsumers(msg: IrcMessage): Boolean =
@@ -44,7 +47,8 @@ class Bot private constructor(private val client: IrcClient) {
 
         val consumed = checkConsumers(msg)
         if (!consumed) {
-            listeners.forEach { it.invoke(client, msg) }
+            val listenersForType = listeners[msg.type] ?: listOf()
+            listenersForType.forEach { it.invoke(client, msg) }
         }
     }
 
@@ -54,3 +58,4 @@ class Bot private constructor(private val client: IrcClient) {
         }
     }
 }
+

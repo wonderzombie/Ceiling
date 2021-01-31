@@ -25,7 +25,7 @@ class BotTest {
             }
         }
 
-        bot.addListeners(chatFn)
+        bot.addListeners(IrcCommand.PRIVMSG, chatFn)
         fakeConn.addToSendList(":foo.bar.baz 001 foo :welcome to the server")
         fakeConn.addToSendList(":foo!~foo@localhost PRIVMSG #bucket :hello bucket")
 

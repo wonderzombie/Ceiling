@@ -16,7 +16,7 @@ val replies = listOf(
 fun main() = runBlocking {
     val bot = Bot.connect(IrcClient(PlainTextConn()))
 
-    bot.addListeners(::nameListener)
+    bot.addListeners(IrcCommand.PRIVMSG, ::nameListener)
 }
 
 fun nameListener(cli: IrcClient, msg: IrcMessage) {
@@ -26,5 +26,6 @@ fun nameListener(cli: IrcClient, msg: IrcMessage) {
 }
 
 fun sleepConsumer(cli: IrcClient, msg: IrcMessage) {
+    var asleep = false
 
 }
