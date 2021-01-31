@@ -10,7 +10,7 @@ typealias ConsumerFn = (c: IrcClient, m: IrcMessage) -> Boolean
 class Bot private constructor(private val client: IrcClient) {
     companion object {
         fun connect(client: IrcClient): Bot {
-            return Bot(client)
+            return Bot(client).also { it.client.handShake() }
         }
     }
 
@@ -19,8 +19,7 @@ class Bot private constructor(private val client: IrcClient) {
     private var registeredModules: List<String> = listOf()
 
     fun register(id: String, fn: (b: Bot) -> Unit) {
-        fn(this)
-        registeredModules = registeredModules.plus(id)
+        fn(this).also { registeredModules = registeredModules.plus(id) }
     }
 
     // For such as a NAMES command that shouldn't percolate down to "user space."

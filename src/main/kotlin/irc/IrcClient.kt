@@ -46,7 +46,6 @@ class IrcClient(private val conn: Connection, val nick: String = "thumbkin") {
 
     private fun pong(ircMessage: IrcMessage) {
         val pingParts = ircMessage.rawMessage.split(":", limit = 2).drop(1)
-        println("| ping parts $pingParts -- sending pong")
         return s("PONG :${pingParts[0]}")
     }
 
@@ -54,12 +53,13 @@ class IrcClient(private val conn: Connection, val nick: String = "thumbkin") {
         s("JOIN $channel $nick").also { this.activeChannel = channel }
 
     fun privmsg(message: String) = runBlocking {
+        // Nobody types the first part out, but who cares.
         t("PRIVMSG $activeChannel :$message")
     }
 
     fun privmsg(channel: String, message: String) = runBlocking {
-        // Nobody types the first part out, but who cares.
-        t("PRIVMSG $channel :$message")
+        activeChannel = channel
+        privmsg(message)
     }
 
     val isConnected: Boolean
