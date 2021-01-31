@@ -1,0 +1,13 @@
+-> NICK thumbkin
+-> USER thumbkin bot localhost :thumbkin
+-> JOIN #blobby thumbkin
+-> PRIVMSG #blobby :hi
+<- :irc.example.net 001 thumbkin :Welcome to the Internet Relay Network thumbkin!~thumbkin@localhost
+<- :thumbkin!~thumbkin@localhost JOIN :#blobby
+<- :asdf!~wonderzombie@localhost PRIVMSG #blobby :foo
+<- :asdf!~wonderzombie@localhost PRIVMSG #blobby :foo bar thumb
+<- :asdf!~wonderzombie@localhost PRIVMSG #blobby :mesage
+<- :asdf!~wonderzombie@localhost PRIVMSG #blobby :masageeeee
+<- :asdf!~wonderzombie@localhost PRIVMSG #blobby :ACTION eats bees
+<- :asdf!~wonderzombie@localhost PRIVMSG #blobby :ACTION attacks thumbkin
+-> PRIVMSG #blobby :where is thumbkin, where is thumbkin
