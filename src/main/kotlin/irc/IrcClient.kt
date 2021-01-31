@@ -2,11 +2,22 @@ package irc
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import java.time.Instant
 import kotlin.random.Random
 
-class IrcClient(private val conn: Connection, private val nick: String = "thumbkin") {
+class IrcClient(private val conn: Connection, val nick: String = "thumbkin") {
+    // send
     private fun s(msg: String) =
         conn.sendMsg(msg)
+
+    // type
+    private fun t(msg: String) = runBlocking {
+        val delayMillis = typeSpeed * msg.split(":")[1].length
+        delay(delayMillis).also { s(msg) }
+    }
+
+    private val typeSpeed: Long
+        get() = 10L * Random.nextInt() % 3
 
     private var activeChannel = ""
 
@@ -43,12 +54,19 @@ class IrcClient(private val conn: Connection, private val nick: String = "thumbk
         s("JOIN $channel $nick").also { this.activeChannel = channel }
 
     fun privmsg(message: String) = runBlocking {
-        delay(message.length * (10L * Random.nextInt() % 3))
-        s("PRIVMSG $activeChannel :$message")
+        t("PRIVMSG $activeChannel :$message")
+    }
+
+    fun privmsg(channel: String, message: String) = runBlocking {
+        // Nobody types the first part out, but who cares.
+        t("PRIVMSG $channel :$message")
     }
 
     val isConnected: Boolean
         get() = this.conn.isConnected
+
+    val now: Instant
+        get() = Instant.now()
 
     fun action(emote: String) = s("PRIVMSG $activeChannel : ACTION $emote")
 

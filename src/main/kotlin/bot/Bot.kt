@@ -19,7 +19,7 @@ class Bot private constructor(private val client: IrcClient) {
     private var registeredModules: List<String> = listOf()
 
     fun register(id: String, fn: (b: Bot) -> Unit) {
-        fn(this);
+        fn(this)
         registeredModules = registeredModules.plus(id)
     }
 
