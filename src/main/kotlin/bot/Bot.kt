@@ -3,10 +3,12 @@ package bot
 import irc.IrcClient
 import irc.IrcCommand
 import irc.IrcMessage
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 typealias ListenerFn = (c: IrcClient, m: IrcMessage) -> Unit
 typealias ConsumerFn = (c: IrcClient, m: IrcMessage) -> Boolean
 
+@ExperimentalCoroutinesApi
 class Bot private constructor(private val client: IrcClient) {
     companion object {
         fun connect(client: IrcClient): Bot {
