@@ -1,7 +1,7 @@
 package irc
 
 data class IrcMessage(val rawMessage: String) {
-    private val userRegex = Regex("""\w[^!]+!~\w+@[\w\.]+""")
+    private val userRegex = Regex("""\w[^!]+!~\w+@[\w.]+""")
 
     val type = IrcCommand.from(rawMessage)
 

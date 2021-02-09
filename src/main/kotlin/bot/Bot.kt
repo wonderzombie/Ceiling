@@ -29,8 +29,7 @@ class Bot private constructor(private val client: IrcClient) {
 
     fun addListeners(type: IrcCommand, vararg newListeners: ListenerFn) {
         val currentListeners = listeners[type] ?: listOf()
-        val allListeners: List<ListenerFn> = currentListeners.plus(newListeners)
-        listeners = listeners.plus(mapOf(type to allListeners))
+        listeners = listeners.plus(mapOf(type to currentListeners.plus(newListeners)))
     }
 
     private fun checkConsumers(msg: IrcMessage): Boolean =
