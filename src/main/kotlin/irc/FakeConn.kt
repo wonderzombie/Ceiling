@@ -1,30 +1,35 @@
 package irc
 
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 class FakeConn : Connection {
     override val isConnected: Boolean
         get() = true
 
-    var received = AtomicReference<List<String>>()
-    var toSend = AtomicReference<List<String>>()
-    var sentTo: Boolean = false
+    val recvReference = AtomicReference<List<String>>(emptyList())
+    val toSendReference = AtomicReference<List<String>>(emptyList())
+    val sendToRef = AtomicBoolean(false)
+
+    var received: List<String> = recvReference.get() ?: emptyList()
+    var toSend: List<String> = toSendReference.get() ?: emptyList()
 
     fun addToSendList(message: String) {
-        toSend.getAndUpdate { it.plus(message) }
+        toSendReference.getAndUpdate { it.plus(message) }
     }
 
     override fun sendMsg(message: String) {
-        sentTo = true
-        received.getAndUpdate { it.plus(message) }
+        sendToRef.compareAndExchange(false, true)
+        recvReference.getAndUpdate { it.plus(message) }
         println("$this sendmsg called: $message")
         println("$this remaining received $received")
     }
 
     override fun readLine(): String {
-        val line = toSend.get().first()
-        toSend.getAndUpdate { it.minus(line) }
-        println("readline called: $line")
+        val line: String = toSendReference.get().let { if (it.isEmpty()) "" else it.first() }
+        toSendReference.getAndUpdate {
+            it.contains(line).let { b -> if (b) it.minus(line) else it }
+        }
         return line
     }
 }

@@ -1,25 +1,27 @@
 package irc
 
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
-import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Test
 
 class AsyncIrcClientTest {
-
     @Test
-    fun client_usesChannel_sendOk() = runBlocking<Unit> {
+    fun client_usesChannel_sendOk() = runBlocking {
         val fakeConn = FakeConn()
+        fakeConn.addToSendList(":foo.bar.net 001 thumbkin :welcome")
+
         val client = AsyncIrcClient(fakeConn)
+        client.clientInput.send("hello")
 
         runBlocking {
-                client.start()
+            client.start()
+            delay(100)
+            client.stop()
         }
-        client.channel.send("hello")
 
-        assertThat(fakeConn.received).contains("hello")
+        assertThat(fakeConn.recvReference.get()).contains("hello")
     }
 
     @Test
@@ -32,15 +34,14 @@ class AsyncIrcClientTest {
 
         var clientReceived: String? = ""
 
-        launch {
-            withTimeoutOrNull(100L) {
+        runBlocking {
+            withTimeout(2000L) {
                 client.start()
-                clientReceived = withTimeoutOrNull(100L) {
-                    client.channel.receive()
+                clientReceived = withTimeout(1000L) {
+                    client.serverFeed.receive()
                 }
-                client.stop()
             }
-        }.join()
+        }
 
         assertThat(clientReceived).isEqualTo(message)
         assertThat(fakeConn.toSend).isEmpty()
