@@ -21,7 +21,7 @@ class AsyncIrcClientTest {
             client.stop()
         }
 
-        assertThat(fakeConn.recvReference.get()).contains("hello")
+        assertThat(fakeConn.received).contains("hello")
     }
 
     @Test
@@ -32,7 +32,7 @@ class AsyncIrcClientTest {
         val message = ":foo.bar.net 001 thumbkin :Welcome to your demise"
         fakeConn.addToSendList(message)
 
-        var clientReceived: String? = ""
+        var clientReceived: String?
 
         runBlocking {
             withTimeout(2000L) {

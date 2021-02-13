@@ -3,14 +3,14 @@ package irc
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
-class IrcClientTest {
+class IrceilingTest {
 
     @Test
     fun send_writesCorrectly() {
         val fakeConn = FakeConn()
         fakeConn.addToSendList(":foo.bar.net 001 thumbkin :hello there: you're great")
 
-        val cli = IrcClient(fakeConn, nick = "grumkin")
+        val cli = Irceiling(fakeConn, nick = "grumkin")
 
         cli.join("#bucket")
         cli.privmsg("what is up my bucket")
@@ -25,7 +25,7 @@ class IrcClientTest {
     @Test
     fun handshake_writesCorrectly() {
         val fakeConn = FakeConn()
-        val cli = IrcClient(fakeConn, nick = "grumkin")
+        val cli = Irceiling(fakeConn, nick = "grumkin")
 
         cli.handShake()
 

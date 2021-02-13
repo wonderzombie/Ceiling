@@ -1,4 +1,5 @@
 import irc.IrcClient
+import irc.Irceiling
 import irc.IrcCommand
 import irc.IrcMessage
 

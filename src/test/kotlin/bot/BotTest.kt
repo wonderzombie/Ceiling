@@ -3,15 +3,17 @@ package bot
 import com.google.common.truth.Truth.assertThat
 import irc.FakeConn
 import irc.IrcClient
+import irc.Irceiling
 import irc.IrcCommand
 import irc.IrcMessage
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
 
 class BotTest {
 
     private val fakeConn = FakeConn()
-    private val bot = Bot.connect(IrcClient(fakeConn))
+    private val bot = Bot.connect(Irceiling(fakeConn))
 
     @Test
     fun bot_connectsAndSends_ok() {

@@ -1,12 +1,12 @@
 package bot
 
-import irc.IrcClient
+import irc.Irceiling
 import irc.IrcMessage
 
 class CombatMod(private val b: Bot) {
     var hpMap: Map<String, Int> = mapOf()
 
-    fun combatListener(cli: IrcClient, msg: IrcMessage) {
+    fun combatListener(cli: Irceiling, msg: IrcMessage) {
 
     }
 }

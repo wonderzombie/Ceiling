@@ -33,7 +33,7 @@ class Bot private constructor(private val client: IrcClient) {
     }
 
     private fun checkConsumers(msg: IrcMessage): Boolean =
-        consumers.map { c -> checkConsume(msg, c).also { r -> println(r) } }.any { it }
+        consumers.map { c -> checkConsume(msg, c) }.any { it }
 
     private fun checkConsume(
         msg: IrcMessage,

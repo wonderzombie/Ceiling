@@ -10,8 +10,7 @@ enum class IrcCommand(private val rx: Regex) {
     companion object {
         fun from(message: String): IrcCommand =
             values().find { enumVal ->
-                enumVal.rx.also { println("it $it in $message") }.matches(message)
-                    .also { println("...$it") }
+                enumVal.rx.matches(message)
             } ?: UNKNOWN
 
     }
