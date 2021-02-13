@@ -15,21 +15,18 @@ class FakeConn : Connection {
     var toSend: List<String> = toSendReference.get() ?: emptyList()
 
     fun addToSendList(message: String) {
-        toSendReference.getAndUpdate { it.plus(message) }
+        toSend = toSend.plus(message)
     }
 
     override fun sendMsg(message: String) {
-        sendToRef.compareAndExchange(false, true)
-        recvReference.getAndUpdate { it.plus(message) }
+        received = received.plus(message)
         println("$this sendmsg called: $message")
         println("$this remaining received $received")
     }
 
     override fun readLine(): String {
-        val line: String = toSendReference.get().let { if (it.isEmpty()) "" else it.first() }
-        toSendReference.getAndUpdate {
-            it.contains(line).let { b -> if (b) it.minus(line) else it }
-        }
+        val line = toSend.let { if (it.isEmpty()) "" else it.last() }
+        toSend = toSend.minus(line)
         return line
     }
 }
