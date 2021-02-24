@@ -5,7 +5,8 @@ enum class IrcCommand(private val rx: Regex) {
     SERVER(Regex("""^:(.+) (\d{3}) (\w+) :?(.*)""")),
     PING(Regex("""^PING :(.+)""")),
     JOIN(Regex("""JOIN (#\w+) (\w+)""")),
-    PRIVMSG((Regex(""":(.*) PRIVMSG (#\w+) :?(.*)""")));
+    PRIVMSG((Regex(""":(.*) PRIVMSG (#\w+) :?(.*)"""))),
+    NAMES((Regex(""":(.*) (353|366) """)));
 
     companion object {
         fun from(message: String): IrcCommand =

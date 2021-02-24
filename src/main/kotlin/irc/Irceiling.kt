@@ -32,11 +32,19 @@ class Irceiling(private val conn: Connection, override val nick: String = "thumb
             rawMessage = conn.readLine()
         }
 
+        val message = IrcMessage.from(rawMessage)
+
+        if (message.type == IrcCommand.PING) pong(message)
+
+        when (message.type) {
+            IrcCommand.PING -> pong(message)
+            else -> println("WHAT THE ... $message")
+        }
+
         return IrcMessage.from(rawMessage).also { if (it.type == IrcCommand.PING) pong(it) }
     }
 
-    private infix fun send(msg: String) =
-        conn.sendMsg(msg)
+    override infix fun say(msg: String) = t(msg)
 
     // the client handles pong without user intervention
     private fun pong(ircMessage: IrcMessage) {
@@ -67,7 +75,11 @@ class Irceiling(private val conn: Connection, override val nick: String = "thumb
     override fun action(emote: String) = s("PRIVMSG $activeChannel : ACTION $emote")
 
     override fun handShake() {
-        this send "NICK $nick"
-        this send "USER $nick bot localhost :$nick"
+        this say "NICK $nick"
+        this say "USER $nick bot localhost :$nick"
+    }
+
+    fun names() {
+        this say "NAMES"
     }
 }

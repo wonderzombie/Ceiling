@@ -1,3 +1,5 @@
+package bot
+
 import irc.IrcClient
 import irc.IrcCommand
 import irc.IrcMessage

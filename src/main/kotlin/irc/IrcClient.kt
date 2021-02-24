@@ -13,4 +13,6 @@ interface IrcClient {
     fun privmsg(channel: String, message: String)
     fun action(emote: String)
     fun handShake()
+
+    infix fun say(msg: String)
 }

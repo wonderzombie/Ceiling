@@ -1,5 +1,6 @@
+package bot
+
 import irc.IrcClient
-import irc.Irceiling
 import irc.IrcCommand
 import irc.IrcMessage
 
@@ -14,7 +15,7 @@ class ReplyMod {
 
     fun replyListener(cli: IrcClient, msg: IrcMessage) {
         with(msg) {
-            if (type == IrcCommand.PRIVMSG && body.contains(cli.nick)) cli.privmsg(replies.random())
+            if (type == IrcCommand.PRIVMSG && body.contains(cli.nick)) cli say replies.random()
         }
     }
 }

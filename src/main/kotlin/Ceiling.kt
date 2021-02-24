@@ -1,4 +1,6 @@
 import bot.Bot
+import bot.ReplyMod
+import bot.SleepMod
 import irc.AsyncIrcClient
 import irc.IrcCommand
 import irc.PlainTextConn
