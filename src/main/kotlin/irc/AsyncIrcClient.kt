@@ -79,4 +79,8 @@ class AsyncIrcClient(private val conn: Connection, override val nick: String = "
     override fun handShake() {
         TODO("Not yet implemented")
     }
+
+    override fun say(msg: String) {
+        TODO("Not yet implemented")
+    }
 }

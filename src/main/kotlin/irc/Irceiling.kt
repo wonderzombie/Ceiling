@@ -12,8 +12,12 @@ class Irceiling(private val conn: Connection, override val nick: String = "thumb
 
     // type
     private fun t(msg: String) = runBlocking {
-        val delayMillis = randomInterval * msg.split(":", limit = 2)[1].length
-        delay(delayMillis).also { s(msg) }
+        val msgParts = msg.split(":", limit = 2)
+
+        val typingOut = if (msgParts.size == 2) msgParts[1] else msg
+
+        val delayMillis = randomInterval * typingOut.length
+        delay(delayMillis).apply { s(msg) }
     }
 
     private val randomInterval: Long

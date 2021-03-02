@@ -7,6 +7,10 @@ import irc.IrcMessage
 typealias ListenerFn = (c: IrcClient, m: IrcMessage) -> Unit
 typealias ConsumerFn = (c: IrcClient, m: IrcMessage) -> Boolean
 
+interface BotMod {
+    fun listener() : ListenerFn
+}
+
 class Bot private constructor(private val client: IrcClient) {
     companion object {
         fun connect(client: IrcClient): Bot {

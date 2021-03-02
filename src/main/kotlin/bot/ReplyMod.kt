@@ -4,7 +4,7 @@ import irc.IrcClient
 import irc.IrcCommand
 import irc.IrcMessage
 
-class ReplyMod {
+class ReplyMod : BotMod {
     private val replies = listOf(
         "i like fire swords",
         "i like bees",
@@ -17,5 +17,9 @@ class ReplyMod {
         with(msg) {
             if (type == IrcCommand.PRIVMSG && body.contains(cli.nick)) cli say replies.random()
         }
+    }
+
+    override fun listener(): ListenerFn {
+        return this::replyListener
     }
 }
