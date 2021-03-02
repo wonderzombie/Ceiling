@@ -4,6 +4,18 @@ import irc.IrcClient
 import irc.IrcMessage
 import kotlin.random.Random
 
+data class Dice(val qty: Int, val size: Int) {
+    fun empty() = qty == 0 && size == 0
+
+    fun valid() = qty in 1..100 && size in 2..200
+
+    companion object {
+        fun empty(): Dice = Dice(0, 0)
+    }
+}
+
+data class Roll(val dice: Dice = Dice.empty(), val bonus: Int = 0, val malus: Int = 0)
+
 class DiceMod : BotMod {
     override fun listener(): ListenerFn {
         return this::receive
@@ -33,33 +45,49 @@ class DiceMod : BotMod {
     }
 
     fun readRoll(command: String): String? {
-        print("| command $command")
-        val match = rollRegex.matchEntire(command) ?: return null
-        val (maybeDiceNum, maybeDie) = match.destructured
-        val numDice = maybeDiceNum.toIntOrNull() ?: return null
-        val die = maybeDie.toIntOrNull() ?: return null
+        println("| command $command")
+        val theDice = parseRoll(command)
 
-        if (numDice > 100 || die > 200) return null
+        if (theDice.empty()) {
+            return null
+        }
 
-        val rolls = roll(numDice, die)
+        val rolls = roll(theDice)
         val sum = rolls.sum()
 
         val outResults = rolls.joinToString(", ")
 
-        val outMessage = "${numDice}d${die} => $outResults -> $sum"
-        println("| outmessage: $outMessage")
+        val rollSummary = if (theDice.qty == 1) outResults else "$outResults -> $sum"
+
+        val outMessage = "${theDice.qty}d${theDice.size} => $rollSummary"
+
+        println("| out message: $outMessage")
 
         return outMessage
     }
 
-    fun diceOk(numDice: Int, die: Int): Boolean {
-        val nDiceValid = numDice <= 100
-        val dieValid = die <= 200 && die != 0
+    fun parseRoll(command: String): Dice {
+        val match = rollRegex.matchEntire(command) ?: return Dice.empty()
+
+        val theDice = match.let {
+            val (diceNum, die) = it.destructured
+            Dice(diceNum.toInt(), die.toInt())
+        }
+        if (!checkDice(theDice)) return Dice.empty()
+
+        return theDice
+    }
+
+    fun checkDice(roll: Dice): Boolean {
+        val nDiceValid = roll.qty <= 100
+        val dieValid = roll.size in 2..200
         return nDiceValid.and(dieValid)
     }
 
-    fun roll(numDice: Int, die: Int) =
-        numDice.downTo(1).map { Random.nextInt(1, die) }
+    fun roll(theDice: Dice) = roll(theDice.qty, theDice.size)
+
+    fun roll(qty: Int, size: Int) =
+        qty.downTo(1).map { Random.nextInt(1, size) }
 
     private fun isBotCommand(msg: IrcMessage) =
         msg.body.startsWith("!")
