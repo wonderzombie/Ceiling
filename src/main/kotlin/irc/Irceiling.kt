@@ -35,17 +35,10 @@ class Irceiling(private val conn: Connection, override val nick: String = "thumb
         while (rawMessage.isEmpty()) {
             rawMessage = conn.readLine()
         }
-
         val message = IrcMessage.from(rawMessage)
-
         if (message.type == IrcCommand.PING) pong(message)
 
-        when (message.type) {
-            IrcCommand.PING -> pong(message)
-            else -> println("WHAT THE ... $message")
-        }
-
-        return IrcMessage.from(rawMessage).also { if (it.type == IrcCommand.PING) pong(it) }
+        return message
     }
 
     override infix fun say(msg: String) = t(msg)

@@ -16,7 +16,7 @@ class DiceModTest {
 
     @Test
     fun readRoll_simpleRolls_succeed() {
-        listOf<String>("2d12", "1d100", "10d6").forEach {
+        listOf("2d12", "1d100", "10d6").forEach {
             assertThat(diceMod.readRoll(it)).startsWith(it)
         }
     }
@@ -34,8 +34,8 @@ class DiceModTest {
 
     @Test
     fun checkRollCommand_simpleCommand_parsedOk() {
-        assertThat(diceMod.parseRoll("XdY").empty()).isTrue()
-        assertThat(diceMod.parseRoll("Xd2").empty()).isTrue()
-        assertThat(diceMod.parseRoll("1d2").empty()).isFalse()
+        assertThat(diceMod.parseRoll("XdY").isEmpty).isTrue()
+        assertThat(diceMod.parseRoll("Xd2").isEmpty).isTrue()
+        assertThat(diceMod.parseRoll("1d2").isEmpty).isFalse()
     }
 }

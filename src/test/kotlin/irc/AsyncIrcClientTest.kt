@@ -37,9 +37,8 @@ class AsyncIrcClientTest {
         runBlocking {
             withTimeout(2000L) {
                 client.start()
-                clientReceived = withTimeout(1000L) {
+                clientReceived =
                     client.serverFeed.receive()
-                }
             }
         }
 

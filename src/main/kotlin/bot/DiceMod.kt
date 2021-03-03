@@ -5,16 +5,29 @@ import irc.IrcMessage
 import kotlin.random.Random
 
 data class Dice(val qty: Int, val size: Int) {
-    fun empty() = qty == 0 && size == 0
+    val empty: Boolean
+        get() = this == theEmptyDice
 
-    fun valid() = qty in 1..100 && size in 2..200
+    val valid: Boolean
+        get() = qty in 1..100 && size in 2..200
 
     companion object {
-        fun empty(): Dice = Dice(0, 0)
+        private val theEmptyDice = Dice(0, 0)
+        fun empty(): Dice = theEmptyDice
     }
 }
 
-data class Roll(val dice: Dice = Dice.empty(), val bonus: Int = 0, val malus: Int = 0)
+data class Roll(val dice: Dice = Dice.empty(), val bonus: Int = 0, val malus: Int = 0) {
+    val isSimple: Boolean get() = bonus == 0 && malus == 0
+    val isEmpty: Boolean get() = this == theEmptyRoll
+    val valid: Boolean get() = dice.valid
+
+    companion object {
+        private val theEmptyRoll = Roll(Dice.empty(), 0, 0)
+        fun empty(): Roll = theEmptyRoll
+        fun simple(qty: Int, size: Int): Roll = Roll(Dice(qty, size), 0, 0)
+    }
+}
 
 class DiceMod : BotMod {
     override fun listener(): ListenerFn {
@@ -46,36 +59,63 @@ class DiceMod : BotMod {
 
     fun readRoll(command: String): String? {
         println("| command $command")
-        val theDice = parseRoll(command)
+        val theRoll = parseRoll(command)
 
-        if (theDice.empty()) {
+        if (theRoll.isEmpty) {
             return null
         }
 
-        val rolls = roll(theDice)
-        val sum = rolls.sum()
+        val rolls = roll(theRoll)
+        val simpleSum = rolls.sum()
+        val totalSum = simpleSum + theRoll.bonus - theRoll.malus
 
         val outResults = rolls.joinToString(", ")
 
-        val rollSummary = if (theDice.qty == 1) outResults else "$outResults -> $sum"
+        val rollSummary = if (theRoll.dice.qty == 1) outResults else "$outResults -> $totalSum"
 
-        val outMessage = "${theDice.qty}d${theDice.size} => $rollSummary"
+        val outMessage = "${theRoll.dice.qty}d${theRoll.dice.size} => $rollSummary"
 
         println("| out message: $outMessage")
 
         return outMessage
     }
 
-    fun parseRoll(command: String): Dice {
-        val match = rollRegex.matchEntire(command) ?: return Dice.empty()
-
-        val theDice = match.let {
-            val (diceNum, die) = it.destructured
-            Dice(diceNum.toInt(), die.toInt())
+    fun parseRoll(command: String): Roll {
+        val theDice = tryEasyMatch(command) ?: Dice.empty()
+        if (theDice.valid) {
+            return Roll(theDice)
         }
-        if (!checkDice(theDice)) return Dice.empty()
+        return tryHardMatch(command)
+    }
 
-        return theDice
+    fun toInt(s: String): Int =
+        if (s.all(Char::isDigit)) (s.toIntOrNull() ?: 0) else 0
+
+    private fun tryHardMatch(command: String): Roll {
+        val commandParts = command.split("d", limit = 2)
+        if (commandParts.size != 2) return Roll.empty()
+
+        val qty: Int = commandParts.firstOrNull()?.toIntOrNull() ?: 0
+
+        // example: "2d12+6" -> "12+6"
+        val maybeTheRest: String = commandParts.drop(1).firstOrNull() ?: ""
+        val stringDigits = maybeTheRest.takeWhile { c -> c.isDigit() }
+        val size = stringDigits.toIntOrNull() ?: 0
+
+        val maybeBonus = maybeTheRest.split("+", limit = 2)
+        val maybeMalus = maybeTheRest.split("-", limit = 2)
+
+        if (maybeBonus.size != 2 && maybeMalus.size != 2) return Roll.simple(0, 0)
+
+        val bonus = maybeBonus.drop(1).firstOrNull()?.toIntOrNull() ?: 0
+        val malus = maybeMalus.drop(1).firstOrNull()?.toIntOrNull() ?: 0
+
+        return Roll(Dice(qty, size), bonus, malus)
+    }
+
+    private fun tryEasyMatch(command: String): Dice? = rollRegex.matchEntire(command)?.let {
+        val (diceNum, die) = it.destructured
+        Dice(diceNum.toInt(), die.toInt())
     }
 
     fun checkDice(roll: Dice): Boolean {
@@ -84,7 +124,9 @@ class DiceMod : BotMod {
         return nDiceValid.and(dieValid)
     }
 
-    fun roll(theDice: Dice) = roll(theDice.qty, theDice.size)
+    fun roll(theRoll: Roll): List<Int> {
+        return roll(theRoll.dice.qty, theRoll.dice.size)
+    }
 
     fun roll(qty: Int, size: Int) =
         qty.downTo(1).map { Random.nextInt(1, size) }
