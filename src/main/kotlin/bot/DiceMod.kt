@@ -2,32 +2,9 @@ package bot
 
 import irc.IrcClient
 import irc.IrcMessage
+import roll.Dice
+import roll.Roll
 import kotlin.random.Random
-
-data class Dice(val qty: Int, val size: Int) {
-    val empty: Boolean
-        get() = this == theEmptyDice
-
-    val valid: Boolean
-        get() = qty in 1..100 && size in 2..200
-
-    companion object {
-        private val theEmptyDice = Dice(0, 0)
-        fun empty(): Dice = theEmptyDice
-    }
-}
-
-data class Roll(val dice: Dice = Dice.empty(), val bonus: Int = 0, val malus: Int = 0) {
-    val isSimple: Boolean get() = bonus == 0 && malus == 0
-    val isEmpty: Boolean get() = this == theEmptyRoll
-    val valid: Boolean get() = dice.valid
-
-    companion object {
-        private val theEmptyRoll = Roll(Dice.empty(), 0, 0)
-        fun empty(): Roll = theEmptyRoll
-        fun simple(qty: Int, size: Int): Roll = Roll(Dice(qty, size), 0, 0)
-    }
-}
 
 class DiceMod : BotMod {
     override fun listener(): ListenerFn {
@@ -91,7 +68,7 @@ class DiceMod : BotMod {
     fun toInt(s: String): Int =
         if (s.all(Char::isDigit)) (s.toIntOrNull() ?: 0) else 0
 
-    private fun tryHardMatch(command: String): Roll {
+    fun tryHardMatch(command: String): Roll {
         val commandParts = command.split("d", limit = 2)
         if (commandParts.size != 2) return Roll.empty()
 
@@ -105,7 +82,7 @@ class DiceMod : BotMod {
         val maybeBonus = maybeTheRest.split("+", limit = 2)
         val maybeMalus = maybeTheRest.split("-", limit = 2)
 
-        if (maybeBonus.size != 2 && maybeMalus.size != 2) return Roll.simple(0, 0)
+        if (maybeBonus.size != 2 && maybeMalus.size != 2) return Roll.from(0, 0)
 
         val bonus = maybeBonus.drop(1).firstOrNull()?.toIntOrNull() ?: 0
         val malus = maybeMalus.drop(1).firstOrNull()?.toIntOrNull() ?: 0
