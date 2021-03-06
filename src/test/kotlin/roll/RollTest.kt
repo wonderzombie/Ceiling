@@ -4,10 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import roll.Roll.Companion.checkDice
 import roll.RollParser.Companion.parse
-import roll.RollParser.Companion.tryHardMatch
 
 class RollTest {
-
 
     @Test
     fun roll_1d6_ok() {
@@ -28,10 +26,13 @@ class RollTest {
     }
 
     @Test
-    fun checkRollCommand_simpleCommand_parsedOk() {
+    fun checkRollCommand_badCommand_isEmptyRoll() {
         assertThat(parse("XdY").isEmpty).isTrue()
         assertThat(parse("Xd2").isEmpty).isTrue()
-        assertThat(parse("1d2").isEmpty).isFalse()
+        assertThat(parse("Xdd2").isEmpty).isTrue()
+        assertThat(parse("X0d2").isEmpty).isTrue()
+        assertThat(parse("0xd2").isEmpty).isTrue()
+        assertThat(parse("888888d").isEmpty).isTrue()
     }
 
     @Test
@@ -50,18 +51,31 @@ class RollTest {
     }
 
     @Test
-    fun tryHardMatch_bonus_correctRoll() {
-        val roll = tryHardMatch("1d2+1")
+    fun parse_bonus_correctRoll() {
+        val roll = parse("1d2+1")
+        assertThat(roll.isEmpty).isFalse()
         assertThat(roll.isSimple).isFalse()
+        assertThat(roll.valid).isTrue()
         assertThat(roll.bonus).isEqualTo(1)
         assertThat(roll.malus).isEqualTo(0)
     }
 
     @Test
-    fun tryHardMatch_malus_correctRoll() {
-        val roll = tryHardMatch("1d2-1")
+    fun parse_malus_correctRoll() {
+        val roll = parse("1d2-1")
+        assertThat(roll.isEmpty).isFalse()
         assertThat(roll.isSimple).isFalse()
-        assertThat(roll.malus).isEqualTo(1)
+        assertThat(roll.valid).isTrue()
+        assertThat(roll).isEqualTo(Roll(Dice(1, 2), 0, 1))
         assertThat(roll.bonus).isEqualTo(0)
+    }
+
+    @Test
+    fun tossAndSum_Result_isCorrect() {
+        val theRoll = Roll(Dice(2, 12), 3, 1)
+        val result = Roll.tossAndSum(theRoll)
+        assertThat(result.results).hasSize(2)
+        assertThat(result.sum).isAtLeast(4)
+        assertThat(result.sum).isAtMost(26)
     }
 }

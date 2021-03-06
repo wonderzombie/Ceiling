@@ -1,47 +1,51 @@
 package roll
 
-import kotlin.random.Random
-
 class RollParser {
     companion object {
         val rollRegex = Regex("(\\d+)d(\\d+)")
 
         fun parse(command: String): Roll {
-            val theDice = tryEasyMatch(command) ?: Dice.empty()
-            if (theDice.valid) {
-                return Roll(theDice)
-            }
-            return tryHardMatch(command)
+            val bonusOrMalus = '+' in command || '-' in command
+            return if (bonusOrMalus) tryIncrementalMatch(command) else trySimpleMatch(command)
         }
 
-        fun toInt(s: String): Int =
+        private fun toInt(s: String?): Int = s?.let {
             if (s.all(Char::isDigit)) (s.toIntOrNull() ?: 0) else 0
+        } ?: 0
 
-        fun tryHardMatch(command: String): Roll {
-            val commandParts = command.split("d", limit = 2)
-            if (commandParts.size != 2) return Roll.empty()
+        private fun trySimpleMatch(command: String): Roll = rollRegex.matchEntire(command)?.let {
+            val (diceNum, size) = it.destructured
+            Roll.from(toInt(diceNum), toInt(size))
+        } ?: Roll.empty
 
-            val qty: Int = commandParts.firstOrNull()?.toIntOrNull() ?: 0
+        private fun tryIncrementalMatch(command: String): Roll {
+            val qty = toInt(command.takeDigits())
+            if (qty == 0) Roll.empty
 
-            // example: "2d12+6" -> "12+6"
-            val maybeTheRest: String = commandParts.drop(1).firstOrNull() ?: ""
-            val stringDigits = maybeTheRest.takeWhile { c -> c.isDigit() }
-            val size = stringDigits.toIntOrNull() ?: 0
+            val maybeTheRest = command.dropDigits()
+            if (!maybeTheRest.startsWith('d')) Roll.empty
 
-            val maybeBonus = maybeTheRest.split("+", limit = 2)
-            val maybeMalus = maybeTheRest.split("-", limit = 2)
+            val size = toInt(maybeTheRest.drop(1).takeDigits())
+            if (size == 0) Roll.empty
 
-            if (maybeBonus.size != 2 && maybeMalus.size != 2) return Roll.from(0, 0)
+            val maybeModifier = maybeTheRest.drop(1).dropDigits()
+            if (!maybeModifier.startsWith(listOf('-', '+'))) Roll.from(qty, size)
 
-            val bonus = maybeBonus.drop(1).firstOrNull()?.toIntOrNull() ?: 0
-            val malus = maybeMalus.drop(1).firstOrNull()?.toIntOrNull() ?: 0
+            val modifier = toInt(maybeModifier.drop(1).takeDigits())
+            if (modifier == 0) Roll.from(qty, size)
+
+            val bonus = if (maybeModifier.first() == '+') modifier else 0
+            val malus = if (maybeModifier.first() == '-') modifier else 0
 
             return Roll(Dice(qty, size), bonus, malus)
         }
 
-        private fun tryEasyMatch(command: String): Dice? = rollRegex.matchEntire(command)?.let {
-            val (diceNum, die) = it.destructured
-            Dice(diceNum.toInt(), die.toInt())
-        }
+        private fun String.takeDigits(): String = this.takeWhile { it.isDigit() }
+
+        private fun String.dropDigits(): String = this.dropWhile { it.isDigit() }
+
+        private fun String.startsWith(prefixes: List<Char>): Boolean =
+            prefixes.any { this.startsWith(it) }
     }
+
 }
