@@ -10,7 +10,7 @@ class RollParser {
         }
 
         private fun toInt(s: String?): Int = s?.let {
-            if (s.all(Char::isDigit)) (s.toIntOrNull() ?: 0) else 0
+            if (it.all(Char::isDigit)) (it.toIntOrNull() ?: 0) else 0
         } ?: 0
 
         private fun trySimpleMatch(command: String): Roll = rollRegex.matchEntire(command)?.let {
