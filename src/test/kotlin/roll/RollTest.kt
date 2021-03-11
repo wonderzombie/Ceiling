@@ -1,6 +1,8 @@
 package roll
 
+import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Test
 import roll.Roll.Companion.checkDice
 import roll.RollParser.Companion.parse
@@ -8,10 +10,24 @@ import roll.RollParser.Companion.parse
 class RollTest {
 
     @Test
-    fun roll_1d6_ok() {
+    fun roll_toss_diceOk() {
         val roll = Roll.toss(1, 6).first()
         assertThat(roll).isAtLeast(1)
         assertThat(roll).isAtMost(6)
+
+        rolling { 2 d 4 }
+    }
+
+    @Test
+    fun infix_dNotation_withBonusMalus_correctRolls() {
+        val diceOne = 4 d 6
+        assertThat(diceOne).isEqualTo(Dice(4, 6))
+
+        val diceTwo = 2 d 12 plus 2
+        assertThat(diceTwo).isEqualTo(Roll(Dice(2, 12), 2, 0))
+
+        val diceThree = 1 d 12 minus 2
+        assertThat(diceThree).isEqualTo(Roll(Dice(1, 12), 0, 2))
     }
 
     @Test
@@ -51,6 +67,24 @@ class RollTest {
     }
 
     @Test
+    fun parse_justSomeRolls_resultsOk() {
+        val rolls = mapOf(
+            "4d6+4" to Roll(Dice(4, 6), bonus = 4),
+            "2d2-1" to 1..3,
+            "1d12" to 1..12,
+            "1d20+5" to 6..25,
+            "1d20-2" to 1..18,
+        )
+
+        val allRolls = rolls.map { parse(it.key) to it.value }
+
+        assertWithMessage("not all rolls were valid $rolls vs. $allRolls")
+            .that(allRolls.all { it.first.valid })
+//            .that(allRolls.all { it.second.contains() })
+            .isTrue()
+    }
+
+    @Test
     fun parse_bonus_correctRoll() {
         val roll = parse("1d2+1")
         assertThat(roll.isEmpty).isFalse()
@@ -79,3 +113,4 @@ class RollTest {
         assertThat(result.sum).isAtMost(26)
     }
 }
+
