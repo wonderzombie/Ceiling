@@ -14,14 +14,14 @@ class DiceMod : BotMod {
         if (!isBotCommand(msg)) return
 
         val commandMsg = msg.body.trimStart('!')
-        val commandTok = commandMsg.split(' ')
-        if (commandTok.size < 2) {
+        val cmdTokens = commandMsg.split(' ')
+        if (cmdTokens.size < 2) {
             return
         }
 
-        val verb = commandTok.first().toLowerCase()
+        val verb = cmdTokens.first().toLowerCase()
         if (verb == "r") {
-            cli say handleRoll(commandTok)
+            cli privmsg handleRoll(cmdTokens)
         }
     }
 

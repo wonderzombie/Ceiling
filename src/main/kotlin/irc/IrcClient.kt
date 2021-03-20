@@ -9,7 +9,7 @@ interface IrcClient {
 
     fun nextMessage(): IrcMessage
     fun join(channel: String)
-    fun privmsg(message: String)
+    infix fun privmsg(message: String)
     fun privmsg(channel: String, message: String)
     fun action(emote: String)
     fun handShake()

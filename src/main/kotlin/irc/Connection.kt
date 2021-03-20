@@ -4,5 +4,5 @@ interface Connection {
     val isConnected: Boolean
 
     fun sendMsg(message: String)
-    fun readLine(): String
+    suspend fun readLine(): String
 }

@@ -24,8 +24,8 @@ class FakeConn : Connection {
         println("$this remaining received $received")
     }
 
-    override fun readLine(): String {
-        val line = toSend.let { if (it.isEmpty()) "" else it.last() }
+    override suspend fun readLine(): String {
+        val line = toSend.let { if (it.isEmpty()) "" else it.first() }
         toSend = toSend.minus(line)
         return line
     }

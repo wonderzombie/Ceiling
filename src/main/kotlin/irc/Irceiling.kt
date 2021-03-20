@@ -33,7 +33,7 @@ class Irceiling(private val conn: Connection, override val nick: String = "thumb
     override fun nextMessage(): IrcMessage {
         var rawMessage = ""
         while (rawMessage.isEmpty()) {
-            rawMessage = conn.readLine()
+            rawMessage = runBlocking { conn.readLine() }
         }
         val message = IrcMessage.from(rawMessage)
         if (message.type == IrcCommand.PING) pong(message)

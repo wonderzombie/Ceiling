@@ -1,25 +1,40 @@
 package irc
 
-import java.io.PrintWriter
-import java.net.InetAddress
-import java.net.Socket
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 
-class PlainTextConn(addr: InetAddress = InetAddress.getLocalHost(), port: Int = 6667) : Connection {
-    private val socket = Socket(addr, port)
-    private val writer = PrintWriter(socket.getOutputStream())
-    private val bufferedReader = socket.getInputStream().bufferedReader()
+class PlainTextConn(
+    private val reader: ReceiveChannel<String>,
+    private val writer: SendChannel<String>
+) :
+    Connection {
+
+    private val clientChannel: Channel<String> = Channel(capacity = 10)
+    private val serverChannel: Channel<String> = Channel(capacity = 10)
+
+    // This accepts input from the client.
+    val sendChannel: SendChannel<String> = clientChannel
 
     override val isConnected: Boolean
-        get() = socket.isConnected
+        get() = !writer.isClosedForSend && !reader.isClosedForReceive
 
     override fun sendMsg(message: String) {
-        writer.write(message + "\r\n").apply { writer.flush() }
-        println("-> $message")
+
+
+        runBlocking {
+            serverChannel.send(message)
+            println("-> $message")
+        }
     }
 
-    override fun readLine(): String =
-        if (bufferedReader.ready()) {
-            bufferedReader.readLine().also { println("<- $it") }
-        } else ""
+    override suspend fun readLine(): String = coroutineScope {
+        runCatching {
+            serverChannel.send(reader.readLine())
+        }
+        return@coroutineScope serverChannel.receive()
+    }
 }
 

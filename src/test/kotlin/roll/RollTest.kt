@@ -2,6 +2,7 @@ package roll
 
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
+import org.junit.Ignore
 import org.junit.Test
 import roll.Roll.Companion.checkDice
 import roll.RollParser.Companion.parse
@@ -65,6 +66,10 @@ class RollTest {
         assertThat(parse("X0d2").isEmpty).isTrue()
         assertThat(parse("0xd2").isEmpty).isTrue()
         assertThat(parse("888888d").isEmpty).isTrue()
+    }
+
+    @Ignore
+    fun parseBonusMalus_correctly() {
         assertThat(parse("10d10+2-1")).isEqualTo(Roll(Dice(10, 10), 2, 1))
     }
 
