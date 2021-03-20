@@ -4,3 +4,5 @@ lib/
 libs/
 out/
 .DS_Store
+*.class
+*.kotlin_module

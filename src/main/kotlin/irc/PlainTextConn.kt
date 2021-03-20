@@ -1,9 +1,11 @@
 package irc
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class PlainTextConn(
@@ -15,15 +17,13 @@ class PlainTextConn(
     private val clientChannel: Channel<String> = Channel(capacity = 10)
     private val serverChannel: Channel<String> = Channel(capacity = 10)
 
-    // This accepts input from the client.
+    // This accepts input from the user.
     val sendChannel: SendChannel<String> = clientChannel
 
     override val isConnected: Boolean
         get() = !writer.isClosedForSend && !reader.isClosedForReceive
 
     override fun sendMsg(message: String) {
-
-
         runBlocking {
             serverChannel.send(message)
             println("-> $message")
@@ -31,10 +31,9 @@ class PlainTextConn(
     }
 
     override suspend fun readLine(): String = coroutineScope {
-        runCatching {
-            serverChannel.send(reader.readLine())
+        launch(Dispatchers.IO) {
+            serverChannel.send(reader.receive())
         }
         return@coroutineScope serverChannel.receive()
     }
 }
-
