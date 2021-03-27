@@ -25,7 +25,7 @@ class FakeConn : Connection {
     }
 
     override suspend fun readLine(): String {
-        val line = toSend.let { if (it.isEmpty()) "" else it.first() }
+        val line = toSend.run { if (isEmpty()) "" else first() }
         toSend = toSend.minus(line)
         return line
     }

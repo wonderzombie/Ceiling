@@ -7,6 +7,7 @@ import irc.Irceiling
 import irc.IrcCommand
 import irc.IrcMessage
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.Test
 
 
@@ -31,8 +32,15 @@ class BotTest {
         fakeConn.addToSendList(":foo.bar.baz 001 foo :welcome to the server")
         fakeConn.addToSendList(":foo!~foo@localhost PRIVMSG #bucket :hello bucket")
 
-        bot.loopOnce()
-        bot.loopOnce()
+        runBlocking {
+            withTimeout(1000L) {
+                bot.loopOnce()
+                println("loop once one")
+                bot.loopOnce()
+                println("loop once two")
+            }
+        }
+        println("now what?")
 
         assertThat(fakeConn.received).isNotEmpty()
         assertThat(fakeConn.received).hasSize(3)

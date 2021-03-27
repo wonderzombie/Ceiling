@@ -7,7 +7,7 @@ interface IrcClient {
     val nick: String
     val isConnected: Boolean
 
-    fun nextMessage(): IrcMessage
+    suspend fun nextMessage(): IrcMessage
     fun join(channel: String)
     infix fun privmsg(message: String)
     fun privmsg(channel: String, message: String)

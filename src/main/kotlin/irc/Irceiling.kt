@@ -30,7 +30,7 @@ class Irceiling(private val conn: Connection, override val nick: String = "thumb
             field = channelList.plus(value)
         }
 
-    override fun nextMessage(): IrcMessage {
+    override suspend fun nextMessage(): IrcMessage {
         var rawMessage = ""
         while (rawMessage.isEmpty()) {
             rawMessage = runBlocking { conn.readLine() }

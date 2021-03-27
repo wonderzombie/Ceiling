@@ -23,7 +23,7 @@ class AsyncConnectionTest {
             launch {
                 3.downTo(1).forEach {
                     theChannel.send("S $it sender sender")
-                    delay(500)
+                    delay(10)
                 }
                 theChannel.close()
             }
@@ -33,7 +33,7 @@ class AsyncConnectionTest {
                 while (open) {
                     val recvFlow = theChannel.receiveAsFlow()
                     recvFlow.collect { msg -> println("got message $msg") }
-                    delay(500)
+                    delay(10)
                     open = !theChannel.isClosedForReceive
                     println("closed for receive? $open")
                 }

@@ -17,26 +17,28 @@ fun main() = runBlocking {
     val socket = Socket(InetAddress.getLocalHost(), 6667)
     val reader = socket.getInputStream().bufferedReader()
     val writer = PrintWriter(socket.getOutputStream())
-    val readChannel: Channel<String> = Channel(capacity = 10)
-    val writeChannel: Channel<String> = Channel(capacity = 10)
+    val socketRead: Channel<String> = Channel(capacity = 10)
+    val socketWrite: Channel<String> = Channel(capacity = 10)
+
+    val plainTextConn = PlainTextConn(socketRead, socketWrite)
 
     launch(Dispatchers.IO) {
         while (true) {
-            reader.readLine().let { readChannel.send(it) }
+            reader.readLine().let { socketRead.send(it) }
             delay(1000)
         }
     }
 
     launch(Dispatchers.IO) {
         while (true) {
-            writer.write(writeChannel.receive())
+            writer.write(socketWrite.receive() + "\n\r")
+            delay(1000)
         }
     }
 
-    Bot.connect(AsyncIrcClient(PlainTextConn(reader = readChannel, writer = writeChannel)))
+    Bot.connect(AsyncIrcClient(plainTextConn))
         .let { bot ->
             bot.addListeners(IrcCommand.PRIVMSG, ReplyMod()::replyListener)
-            bot.addConsumers(SleepMod()::sleepConsumer)
             bot.loopForever()
         }
 }

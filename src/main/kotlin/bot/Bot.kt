@@ -3,13 +3,7 @@ package bot
 import irc.IrcClient
 import irc.IrcCommand
 import irc.IrcMessage
-
-typealias ListenerFn = (c: IrcClient, m: IrcMessage) -> Unit
-typealias ConsumerFn = (c: IrcClient, m: IrcMessage) -> Boolean
-
-interface BotMod {
-    fun listener() : ListenerFn
-}
+import kotlinx.coroutines.withTimeoutOrNull
 
 class Bot private constructor(private val client: IrcClient) {
     companion object {
@@ -19,44 +13,30 @@ class Bot private constructor(private val client: IrcClient) {
     }
 
     private var listeners: Map<IrcCommand, List<ListenerFn>> = mapOf()
-    private var consumers: List<ConsumerFn> = listOf()
-    private var registeredModules: List<String> = listOf()
-
-    fun register(id: String, fn: (b: Bot) -> Unit) {
-        fn(this).also { registeredModules = registeredModules.plus(id) }
-    }
-
-    // For such as a NAMES command that shouldn't percolate down to "user space."
-    fun addConsumers(vararg newConsumers: ConsumerFn) {
-        consumers = consumers.plus(newConsumers)
-    }
 
     fun addListeners(type: IrcCommand, vararg newListeners: ListenerFn) {
-        val currentListeners = listeners[type] ?: listOf()
+        val currentListeners = listeners[type].orEmpty()
         listeners = listeners.plus(mapOf(type to currentListeners.plus(newListeners)))
     }
 
-    private fun checkConsumers(msg: IrcMessage): Boolean =
-        consumers.map { c -> checkConsume(msg, c) }.any { it }
-
-    private fun checkConsume(
-        msg: IrcMessage,
-        fn: ConsumerFn
-    ): Boolean = fn.invoke(client, msg).also { println("consuming: $msg ? $it") }
-
-    fun loopOnce() {
-        client.nextMessage().let { msg ->
-            if (checkConsumers(msg)) {
-                return
-            }
-            listeners[msg.type]?.forEach { l -> l.invoke(client, msg) }
+    suspend fun loopOnce() = withTimeoutOrNull(500L) {
+        println("| loop")
+        client.nextMessage().run {
+            listeners[type].orEmpty().onEach { l -> l.invoke(client, this) }
         }
     }
 
-    fun loopForever() {
+    suspend fun loopForever() {
         while (true) {
             loopOnce()
         }
     }
+}
+
+typealias ListenerFn = (c: IrcClient, m: IrcMessage) -> Unit
+typealias ConsumerFn = (c: IrcClient, m: IrcMessage) -> Boolean
+
+interface BotMod {
+    fun listener(): ListenerFn
 }
 
