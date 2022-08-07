@@ -13,38 +13,35 @@ data class Result(val theRoll: Roll, val results: List<Int> = emptyList()) {
     }
 }
 
-infix fun Int.d(size: Int): Dice =
-    Dice(this, size)
+infix fun Int.d(size: Int): Dice = Dice(this, size)
 
 infix fun Dice.plus(bonus: Int) = Roll(this, bonus, 0)
 infix fun Dice.minus(minus: Int) = Roll(this, 0, minus)
 
-fun rollCheck(rollFn: () -> Roll): Result =
-    with(rollFn()) { Result(this, Roll.toss(this)) }
+fun rollThat(rollFn: () -> Roll): Result = with(rollFn()) { Result(this, Roll.many(this)) }
 
 fun rollIt(diceFn: () -> Any): Result = rollOrEmpty(diceFn())
 
 private fun rollOrEmpty(that: Any): Result = when (that) {
-    is Roll -> rollCheck { that }
-    is Dice -> rollCheck { Roll(that) }
+    is Roll -> rollThat { that }
+    is Dice -> rollThat { Roll(that) }
     else -> Result.empty
 }
 
-fun rollDice(diceFn: () -> Dice): Result = rollCheck { Roll(diceFn()) }
+fun rollDice(diceFn: () -> Dice): Result = rollThat { Roll(diceFn()) }
 
 private fun rollIt_handlerWithMethodRefs(diceFn: () -> Any): Result = diceFn().let {
     val handler = when (it) {
         is Dice -> ::rollDice
-        is Roll -> ::rollCheck
+        is Roll -> ::rollThat
         else -> Result::empty
     }
     handler.call(diceFn)
 }
 
-private fun rollIt_justWith(diceFn: () -> Any): Result =
-    with(diceFn()) { rollOrEmpty(this) }
+private fun rollIt_justWith(diceFn: () -> Any): Result = with(diceFn()) { rollOrEmpty(this) }
 
-data class Roll(val dice: Dice = Dice.empty(), val bonus: Int = 0, val malus: Int = 0) {
+data class Roll(val dice: Dice = Dice.empty(), val bonus: Int = 0, val malus: Int = 0, val sub: Boolean = false) {
     val isSimple: Boolean get() = bonus == 0 && malus == 0
     val isEmpty: Boolean get() = this == empty
     val valid: Boolean get() = dice.valid && checkDice(dice)
@@ -57,18 +54,15 @@ data class Roll(val dice: Dice = Dice.empty(), val bonus: Int = 0, val malus: In
 
         fun from(qty: Int, size: Int): Roll = Roll(Dice(qty, size))
 
-        fun checkDice(roll: Dice): Boolean {
-            return roll.qty <= 100 && roll.size in 2..200
-        }
+        fun checkDice(roll: Dice): Boolean = roll.qty <= 100 && roll.size in 2..200
 
-        fun toss(theRoll: Roll): List<Int> {
-            return toss(theRoll.dice.qty, theRoll.dice.size)
-        }
+        fun justOne(die: Int): Int = Random.nextInt(1, die)
 
-        fun toss(qty: Int, size: Int) =
-            qty.downTo(1).map { Random.nextInt(1, size) }
+        fun check(theRoll: Roll, target: Int): Boolean = many(theRoll).all { it >= target }
 
-        fun tossAndSum(theRoll: Roll): Result = Result(theRoll, toss(theRoll))
+        fun many(theRoll: Roll): List<Int> = theRoll.dice.qty.downTo(1).map { justOne(theRoll.dice.size) }
+
+        fun total(theRoll: Roll): Result = Result(theRoll, many(theRoll))
 
     }
 }

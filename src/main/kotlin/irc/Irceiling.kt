@@ -6,11 +6,11 @@ import java.time.Instant
 import kotlin.random.Random
 
 class Irceiling(private val conn: Connection, override val nick: String = "thumbkin") : IrcClient {
-    // send
+    // send the string; no delay
     private fun s(msg: String) =
         conn.sendMsg(msg)
 
-    // type
+    // pretend to have fingers ("type")
     private fun t(msg: String) = runBlocking {
         val msgParts = msg.split(":", limit = 2)
 
@@ -36,7 +36,7 @@ class Irceiling(private val conn: Connection, override val nick: String = "thumb
             rawMessage = runBlocking { conn.readLine() }
         }
         val message = IrcMessage.from(rawMessage)
-        if (message.type == IrcCommand.PING) pong(message)
+        if (message.kind == IrcCommand.PING) pong(message)
 
         return message
     }

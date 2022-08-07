@@ -11,7 +11,7 @@ class RollTest {
 
     @Test
     fun roll_toss_diceOk() {
-        val roll = Roll.toss(1, 6).first()
+        val roll = Roll.justOne(6)
         assertThat(roll).isAtLeast(1)
         assertThat(roll).isAtMost(6)
     }
@@ -25,8 +25,8 @@ class RollTest {
 
     @Test
     fun rollCheck_rollsOk() {
-        val (theRoll, results) = rollCheck { 2 d 4 plus 2 }
-        val (theOtherRoll, otherResults) = rollCheck { 2 d 4 minus 2 }
+        val (theRoll, results) = rollThat { 2 d 4 plus 2 }
+        val (theOtherRoll, otherResults) = rollThat { 2 d 4 minus 2 }
 
         assertThat(theRoll).isEqualTo(Roll(Dice(2, 4), bonus = 2))
         assertThat(results).hasSize(2)
@@ -129,7 +129,7 @@ class RollTest {
     fun tossAndSum_Result_isCorrect() {
         val theRoll = Roll(Dice(2, 12), bonus = 3, malus = 1)
 
-        val result = Roll.tossAndSum(theRoll)
+        val result = Roll.total(theRoll)
 
         assertThat(result.results).hasSize(2)
         assertThat(result.sum).isIn(4..26)

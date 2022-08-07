@@ -10,7 +10,7 @@ class IrcMessageTest {
         val rawMessage = ":foo.bar.net 001 thumbkin :Welcome to your demise"
         val ircMessage = IrcMessage.from(rawMessage)
 
-        assertThat(ircMessage.type).isEqualTo(IrcCommand.SERVER)
+        assertThat(ircMessage.kind).isEqualTo(IrcCommand.SERVER)
         assertThat(ircMessage.header).isEqualTo("foo.bar.net 001 thumbkin")
 
         val captures = ircMessage.captured()
@@ -27,7 +27,7 @@ class IrcMessageTest {
         val rawMessage =
             ":foo!~bar@localhost PRIVMSG #blobby :hello there my friend: you're the best"
         val ircMessage = IrcMessage.from(rawMessage)
-        assertThat(ircMessage.type).isEquivalentAccordingToCompareTo(IrcCommand.PRIVMSG)
+        assertThat(ircMessage.kind).isEquivalentAccordingToCompareTo(IrcCommand.PRIVMSG)
         assertThat(ircMessage.header).startsWith("foo!~bar@localhost")
         assertThat(ircMessage.header).contains("#blobby")
         assertThat(ircMessage.body).contains("hello there my friend: you're the best")
@@ -37,7 +37,7 @@ class IrcMessageTest {
     fun ircMessage_JOIN_capturedCorrectly() {
         val rawMessage = "JOIN #blobby botname"
         val ircMessage = IrcMessage.from(rawMessage)
-        assertThat(ircMessage.type).isEquivalentAccordingToCompareTo(IrcCommand.JOIN)
+        assertThat(ircMessage.kind).isEquivalentAccordingToCompareTo(IrcCommand.JOIN)
         assertThat(ircMessage.header).contains(rawMessage)
     }
 
@@ -45,6 +45,6 @@ class IrcMessageTest {
     fun ircMessage_PING_capturedCorrectly() {
         val rawMessage = "PING :irc.example.net"
         val ircMessage = IrcMessage.from(rawMessage)
-        assertThat(ircMessage.type).isEquivalentAccordingToCompareTo(IrcCommand.PING)
+        assertThat(ircMessage.kind).isEquivalentAccordingToCompareTo(IrcCommand.PING)
     }
 }

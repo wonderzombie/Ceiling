@@ -22,7 +22,7 @@ class Bot private constructor(private val client: IrcClient) {
     suspend fun loopOnce() = withTimeoutOrNull(500L) {
         println("| loop")
         client.nextMessage().run {
-            listeners[type].orEmpty().onEach { l -> l.invoke(client, this) }
+            listeners[kind].orEmpty().onEach { l -> l.invoke(client, this) }
         }
     }
 

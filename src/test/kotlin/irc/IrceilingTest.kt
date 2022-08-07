@@ -15,8 +15,8 @@ class IrceilingTest {
         cli.join("#bucket")
         cli.privmsg("what is up my bucket")
 
-        assertThat(fakeConn.received).hasSize(2)
-        assertThat(fakeConn.received).containsExactly(
+        assertThat(fakeConn.recv.acquire).hasSize(2)
+        assertThat(fakeConn.recv.acquire).containsExactly(
             "JOIN #bucket grumkin", "PRIVMSG #bucket :what is up my bucket"
         )
 
@@ -29,8 +29,8 @@ class IrceilingTest {
 
         cli.handShake()
 
-        assertThat(fakeConn.received).isNotEmpty()
-        assertThat(fakeConn.received).containsExactly(
+        assertThat(fakeConn.recv.acquire).isNotEmpty()
+        assertThat(fakeConn.recv.acquire).containsExactly(
             "NICK grumkin",
             "USER grumkin bot localhost :grumkin"
         )

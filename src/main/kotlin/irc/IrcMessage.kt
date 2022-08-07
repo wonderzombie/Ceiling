@@ -3,7 +3,7 @@ package irc
 data class IrcMessage(val rawMessage: String) {
     private val userRegex = Regex("""\w[^!]+!~\w+@[\w.]+""")
 
-    val type = IrcCommand.from(rawMessage)
+    val kind = IrcCommand.from(rawMessage)
 
     var header: String = ""
     var body: String = ""
@@ -21,7 +21,7 @@ data class IrcMessage(val rawMessage: String) {
     }
 
     private fun parseUserMessage(rawMessage: String): IrcMessage {
-        when (type) {
+        when (kind) {
             IrcCommand.PRIVMSG -> {
                 rawMessage.split(":", limit = 2).let {
                     if (it.isEmpty()) return@let
@@ -43,7 +43,8 @@ data class IrcMessage(val rawMessage: String) {
         return this
     }
 
-    fun captured() = type.captures(rawMessage)
+    fun captured() = kind.captures(rawMessage)
+
 
     companion object {
         fun from(rawMessage: String): IrcMessage = IrcMessage(rawMessage).parse()

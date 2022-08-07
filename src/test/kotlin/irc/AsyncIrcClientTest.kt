@@ -23,7 +23,7 @@ class AsyncIrcClientTest {
             job.join()
         }
 
-        assertThat(fakeConn.received).contains("hello")
+        assertThat(fakeConn.recv.acquire).contains("hello")
     }
 
     @Test
@@ -46,6 +46,6 @@ class AsyncIrcClientTest {
         }
 
         assertThat(clientReceived).isEqualTo(welcomeMsg)
-        assertThat(fakeConn.toSend).isEmpty()
+        assertThat(fakeConn.recv.acquire).isEmpty()
     }
 }

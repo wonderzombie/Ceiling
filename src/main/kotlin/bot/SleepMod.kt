@@ -5,12 +5,12 @@ import irc.IrcCommand
 import irc.IrcMessage
 import java.time.Instant
 
-class SleepMod {
+class SleepMod: BotMod {
     private var asleep = false
     private var wakeUpTime = Instant.EPOCH
 
     fun sleepConsumer(cli: IrcClient, msg: IrcMessage): Boolean {
-        if (msg.type != IrcCommand.PRIVMSG) return false
+        if (msg.kind != IrcCommand.PRIVMSG) return false
 
         if (!asleep && msg.body.contains("shut up, ${cli.nick}")) {
             asleep = true
@@ -25,5 +25,9 @@ class SleepMod {
             return true
         }
         return false
+    }
+
+    override fun listener(): ListenerFn {
+        TODO("Not yet implemented")
     }
 }

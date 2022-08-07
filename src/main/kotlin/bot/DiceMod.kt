@@ -39,7 +39,7 @@ class DiceMod : BotMod {
             return null
         }
 
-        val rolls = Roll.toss(theRoll)
+        val rolls = Roll.many(theRoll)
         val simpleSum = rolls.sum()
         val totalSum = simpleSum + theRoll.bonus - theRoll.malus
 

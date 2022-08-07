@@ -13,9 +13,9 @@ class ReplyMod : BotMod {
         "where is thumbkin, where is thumbkin"
     )
 
-    fun replyListener(cli: IrcClient, msg: IrcMessage) {
+    fun replyListener(ircClient: IrcClient, msg: IrcMessage) {
         with(msg) {
-            if (type == IrcCommand.PRIVMSG && body.contains(cli.nick)) cli say replies.random()
+            if (kind == IrcCommand.PRIVMSG && body.contains(ircClient.nick)) ircClient say replies.random()
         }
     }
 
